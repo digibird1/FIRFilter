@@ -5,11 +5,12 @@
 
 function FilterDesigner
 
-CutOffFreq=20;%change in Hz, max 1/2 of teh sample frequency
-SampleRate=100;%Sample Rate
+CutOffFreq=25;%change in Hz, max 1/2 of teh sample frequency
+SampleRate=1000;%Sample Rate
 %Bandwidth of the filter
-BW=0.02;%Change
+BW=0.2;%Change
 MakeHighPass=0; %0 Low pass, 1 High Pass
+FilterGain=5; % default is "1" gain can be used to compensate the negative gain during interpolation
 
 %Length of filter Kernel
 M=round(4/BW)+1;
@@ -45,7 +46,7 @@ for i = 1:M
 endfor
 
 for i = 1:M
-	Filter(i)=Filter(i)/Sum;
+	Filter(i)=FilterGain*Filter(i)/Sum;
 endfor
 
 %Convert filter from low pass to high pass
