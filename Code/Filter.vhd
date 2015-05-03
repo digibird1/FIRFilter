@@ -11,19 +11,28 @@
 -- Copyright 2015. All rights reserved
 -----------------------------------------------------------------------------
 
+
+
+use work.myFilter_pkg.all; 
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.fixed_pkg.all;
 use ieee.std_logic_signed.all;
-use ieee.numeric_std.all;   
+use ieee.numeric_std.all;  
 
 
 
 entity Filter is
   generic (
-    --g_Variable : integer := 10
+
+		--Do not change this g_fixInt, g_fixDec without changing
+		-- also the package definition
+		-- quartus does not support VHDL 2008 arrays with two unconstraint sizes
 		g_fixInt : integer := 10; --N bits infront of the point
 		g_fixDec : integer := 12; --N bits after the point
+		
+		
 		g_FilterCoef : integer := 21; -- Number of filter coefficients
 		
 		--these must be smaller than g_fixInt
@@ -35,6 +44,8 @@ entity Filter is
 		clk		: in std_logic;
 		reset	:	in	std_logic;
 		
+		Filter : in Filter_type(0 to g_FilterCoef-1);--array with all filter poles
+		
 		signal_in_int : in std_logic_vector(g_InputBits-1 downto 0);
 		signal_out_int : out std_logic_vector(g_OutputBits-1 downto 0)
 		
@@ -44,34 +55,34 @@ end entity;
 
 architecture rtl of Filter is
 
-type Filter_type is array (0 to g_FilterCoef-1) of sfixed (g_fixInt-1 downto -1*g_fixDec);
+--type Filter_type is array (0 to g_FilterCoef-1) of sfixed (g_fixInt-1 downto -1*g_fixDec);
 type IterBuffer is array (0 to g_FilterCoef-1) of sfixed (g_fixInt-1 downto -1*g_fixDec);
 
---Place here the list of coefficients (Filter Kernel)
-signal Filter : Filter_type :=
-(  
-0	=>to_sfixed (-0.000164, g_fixInt-1,-1*g_fixDec),
-1	=>to_sfixed (-0.001286, g_fixInt-1,-1*g_fixDec),
-2	=>to_sfixed (0.000000, g_fixInt-1,-1*g_fixDec),
-3	=>to_sfixed (0.008320, g_fixInt-1,-1*g_fixDec),
-4	=>to_sfixed (0.010323, g_fixInt-1,-1*g_fixDec),
-5	=>to_sfixed (-0.019086, g_fixInt-1,-1*g_fixDec),
-6	=>to_sfixed (-0.054476, g_fixInt-1,-1*g_fixDec),
-7	=>to_sfixed (0.000000, g_fixInt-1,-1*g_fixDec),
-8	=>to_sfixed (0.185697, g_fixInt-1,-1*g_fixDec),
-9	=>to_sfixed (0.370673, g_fixInt-1,-1*g_fixDec),
-10	=>to_sfixed (0.370673, g_fixInt-1,-1*g_fixDec),
-11	=>to_sfixed (0.185697, g_fixInt-1,-1*g_fixDec),
-12	=>to_sfixed (0.000000, g_fixInt-1,-1*g_fixDec),
-13	=>to_sfixed (-0.054476, g_fixInt-1,-1*g_fixDec),
-14	=>to_sfixed (-0.019086, g_fixInt-1,-1*g_fixDec),
-15	=>to_sfixed (0.010323, g_fixInt-1,-1*g_fixDec),
-16	=>to_sfixed (0.008320, g_fixInt-1,-1*g_fixDec),
-17	=>to_sfixed (0.000000, g_fixInt-1,-1*g_fixDec),
-18	=>to_sfixed (-0.001286, g_fixInt-1,-1*g_fixDec),
-19	=>to_sfixed (-0.000164, g_fixInt-1,-1*g_fixDec),
-20	=>to_sfixed (-0.000000, g_fixInt-1,-1*g_fixDec)
-);
+----Place here the list of coefficients (Filter Kernel)
+--signal Filter : Filter_type(0 to 20) :=
+--(  
+--0	=>to_sfixed (-0.000164, g_fixInt-1,-1*g_fixDec),
+--1	=>to_sfixed (-0.001286, g_fixInt-1,-1*g_fixDec),
+--2	=>to_sfixed (0.000000, g_fixInt-1,-1*g_fixDec),
+--3	=>to_sfixed (0.008320, g_fixInt-1,-1*g_fixDec),
+--4	=>to_sfixed (0.010323, g_fixInt-1,-1*g_fixDec),
+--5	=>to_sfixed (-0.019086, g_fixInt-1,-1*g_fixDec),
+--6	=>to_sfixed (-0.054476, g_fixInt-1,-1*g_fixDec),
+--7	=>to_sfixed (0.000000, g_fixInt-1,-1*g_fixDec),
+--8	=>to_sfixed (0.185697, g_fixInt-1,-1*g_fixDec),
+--9	=>to_sfixed (0.370673, g_fixInt-1,-1*g_fixDec),
+--10	=>to_sfixed (0.370673, g_fixInt-1,-1*g_fixDec),
+--11	=>to_sfixed (0.185697, g_fixInt-1,-1*g_fixDec),
+--12	=>to_sfixed (0.000000, g_fixInt-1,-1*g_fixDec),
+--13	=>to_sfixed (-0.054476, g_fixInt-1,-1*g_fixDec),
+--14	=>to_sfixed (-0.019086, g_fixInt-1,-1*g_fixDec),
+--15	=>to_sfixed (0.010323, g_fixInt-1,-1*g_fixDec),
+--16	=>to_sfixed (0.008320, g_fixInt-1,-1*g_fixDec),
+--17	=>to_sfixed (0.000000, g_fixInt-1,-1*g_fixDec),
+--18	=>to_sfixed (-0.001286, g_fixInt-1,-1*g_fixDec),
+--19	=>to_sfixed (-0.000164, g_fixInt-1,-1*g_fixDec),
+--20	=>to_sfixed (-0.000000, g_fixInt-1,-1*g_fixDec)
+--);
 
 --signal Filter : Filter_type :=
 --(
